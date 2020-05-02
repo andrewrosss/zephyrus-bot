@@ -41,14 +41,15 @@ AVAILABLE_REGEX = re.compile(r"[Aa]vailable")
 # the template to use when logging http respoonses
 RESPONSE_TEMPLATE = "{status_code} - {reason} - {url}"
 
+# the slack channel to post to
 SLACK_WEB_HOOK_URL = os.getenv("SLACK_WEB_HOOK_URL", None)
 
 
-def configure_logger() -> loguru._logger.Logger:
+def configure_logger(level: str = "DEBUG") -> loguru._logger.Logger:
     """Configures the loguru logger obeject."""
     logger = loguru.logger
     logger.remove()
-    logger.add(sys.stdout, level="DEBUG")
+    logger.add(sys.stdout, level=level)
     return logger
 
 
@@ -64,6 +65,7 @@ def cli() -> None:
     """The CLI entrypoint"""
     parser = create_parser()
     args = parser.parse_args()
+    _ = configure_logger(args.log_level)
     args.func(args)
 
 
@@ -79,6 +81,15 @@ def create_parser() -> argparse.ArgumentParser:
         help="The BestBuy product page URL. If not specified, the availability "
         "status of the ASUS ROG Zephyrus G14 is retrieved (url: "
         f"{ROG_ZERPHYRUS_G14_PAGE})",
+    )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_const",
+        const="DEBUG",
+        default="INFO",
+        dest="log_level",
+        help="set logging to DEBUG",
     )
     parser.add_argument(
         "-v",
@@ -127,7 +138,7 @@ def get_product_page(url: str) -> bs4.BeautifulSoup:
     """
     logger.debug("Retrieving product page")
     r = requests.get(url, headers=HEADERS)
-    logger.info(
+    logger.debug(
         RESPONSE_TEMPLATE, status_code=r.status_code, reason=r.reason, url=r.url
     )
     if r.status_code not in [200, 201, 203]:
@@ -187,7 +198,7 @@ def send_response(text: str) -> None:
         )
     else:
         r = requests.post(SLACK_WEB_HOOK_URL, json={"text": response_text},)
-        logger.info(
+        logger.debug(
             RESPONSE_TEMPLATE, status_code=r.status_code, reason=r.reason, url=r.url
         )
 
