@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "zephyrus-bot"
+version = "0.1.0"
+description = "Scrape BestBuy's website to check if the ASUS ROG Zephyrus G14 is available online"
+authors = ["Andrew Ross <andrew.ross.mail@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+requests = "^2.23.0"
+beautifulsoup4 = "^4.9.0"
+loguru = "^0.4.1"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+flake8 = "^3.7.9"
+pylint = "^2.5.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
